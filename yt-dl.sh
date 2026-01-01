@@ -20,6 +20,7 @@ CUSTOM_UA="${CUSTOM_UA:-}"             # set to a UA string
 # Parsed CLI options (defaults)
 CLI_ID=""
 CLI_AUTO=0
+CLI_HAS_ARGS=0
 
 # --------------------- FLAG BUILD ---------------------
 COMMON_FLAGS=()
@@ -368,6 +369,10 @@ interactive_mode() {
 
 # --------------------- ARG PARSER ---------------------
 # (Bash 3.2 compatible)
+if [ $# -gt 0 ]; then
+  CLI_HAS_ARGS=1
+fi
+
 while [ $# -gt 0 ]; do
   case "$1" in
     --id=*)
@@ -409,6 +414,15 @@ while [ $# -gt 0 ]; do
 done
 
 # --------------------- ENTRY ---------------------
+# If no params: ask for ID, then ask auto y/n.
+if [ "$CLI_HAS_ARGS" = "0" ]; then
+  echo "Enter the video ID or URL:"
+  read -r CLI_ID
+  [ -n "${CLI_ID:-}" ] || { echo "No ID provided."; exit 2; }
+
+  CLI_AUTO=1
+fi
+
 if [ "$CLI_AUTO" = "1" ]; then
   if [ -n "$CLI_ID" ]; then
     auto_mode "$CLI_ID"
